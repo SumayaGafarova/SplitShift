@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SplitShift – Shift swaps without the group chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f3ee;--card:#fff;--ink:#231a14;--mut:#6b5d53;--line:#e2d9cf;--acc:#c2410c;--accfg:#fff;--soft:#fdeadd;--ok:#15803d;--warn:#b45309;--bad:#b91c1c;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17110d;--card:#221a15;--ink:#f3ebe4;--mut:#a89a8e;--line:#3a2e26;--acc:#fb923c;--accfg:#2a1204;--soft:#3a2216;--ok:#4ade80;--warn:#f0a64a;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#17110d;--card:#221a15;--ink:#f3ebe4;--mut:#a89a8e;--line:#3a2e26;--acc:#fb923c;--accfg:#2a1204;--soft:#3a2216;--ok:#4ade80;--warn:#f0a64a;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque",Inter,system-ui,sans-serif;margin:0;letter-spacing:-.015em}
+.w{max-width:1040px;margin:0 auto;padding:0 16px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font:700 22px "Bricolage Grotesque",Inter,sans-serif}
+.hero{padding:28px 0 18px}
+.hero h1{font-size:clamp(30px,5vw,46px);line-height:1.1;max-width:18ch}
+.hero p{color:var(--mut);max-width:58ch;margin:12px 0 18px;font-size:17px}
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.feat div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.feat b{display:block;margin-bottom:2px}.feat span{color:var(--mut);font-size:13px}
+.app{padding:18px 0 40px}
+.who{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut)}
+select,input{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:7px;padding:6px 8px}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px;margin-bottom:14px}
+nav button{border:0;background:none;color:var(--mut);font:inherit;font-weight:500;padding:7px 14px;border-radius:7px;cursor:pointer}
+nav button[aria-selected=true]{background:var(--acc);color:var(--accfg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:var(--bad);color:#fff;font-size:12px;text-align:center}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:700px}
+th,td{border:1px solid var(--line);padding:6px;vertical-align:top;text-align:left}
+th{font-size:13px;color:var(--mut);font-weight:500;background:var(--bg)}
+.chip{display:block;margin:0 0 4px;padding:3px 7px;border-radius:6px;background:var(--bg);font-size:13px}
+.chip.me{background:var(--soft);border:1px solid var(--acc)}
+.chip button{display:block;margin-top:3px}
+.btn{background:var(--acc);color:var(--accfg);border:0;border-radius:8px;padding:6px 12px;font:inherit;font-weight:500;cursor:pointer}
+.btn.g{background:none;color:var(--mut);border:1px solid var(--line)}
+.btn.s{padding:2px 8px;font-size:12px}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;border:1px solid currentColor}
+.Open{color:var(--acc)}.Pending{color:var(--warn)}.Approved{color:var(--ok)}.Declined,.Cancelled{color:var(--bad)}
+.row{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.mut{color:var(--mut);font-size:13px}
+.names span{display:inline-block;margin:2px 4px 0 0;padding:1px 9px;border-radius:999px;border:1px solid var(--line);font-size:13px}
+.empty{color:var(--mut);text-align:center;padding:18px 0}
+.av{display:grid;grid-template-columns:80px repeat(7,1fr);gap:6px;align-items:center;max-width:620px}
+.new{border-left:3px solid var(--acc)}
+footer{color:var(--mut);font-size:13px;padding-bottom:30px}
+@media (max-width:720px){.feat{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="w">
+<header class="top">
+  <div class="brand"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--acc)"/><path d="M8 12h14l-4-4M24 20H10l4 4" fill="none" stroke="var(--accfg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>SplitShift</div>
+  <label class="who">Signed in as <select id="who" aria-label="Signed in as"></select></label>
+</header>
+<section class="hero">
+  <h1>Shift swaps without the group chat</h1>
+  <p>Employees post a shift they cannot work, available coworkers pick it up, and the manager approves in one place. Try the prototype below.</p>
+  <div class="feat">
+    <div><b>Shift calendar</b><span>The whole week at a glance.</span></div>
+    <div><b>Smart matching</b><span>Only free, available coworkers.</span></div>
+    <div><b>Manager approval</b><span>Nothing changes without a yes.</span></div>
+    <div><b>Instant alerts</b><span>Everyone hears about changes.</span></div>
+  </div>
+</section>
+<main class="app"><nav id="tabs" role="tablist"></nav><div id="view"></div></main>
+<footer>Prototype: accounts are demo profiles and all data stays in this browser. <button class="btn g s" id="reset" type="button">Reset demo data</button></footer>
+</div>
+<script>
+var D=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],SL=["Morning","Evening"],TM=["08:00–14:00","14:00–22:00"];
+var S,who="e1",tab="sched";
+function $(i){return document.getElementById(i)}
+function esc(s){var d=document.createElement("div");d.textContent=s==null?"":String(s);return d.innerHTML}
+function now(){var d=new Date();return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function seed(){
+  var E=[{id:"e0",name:"Aysel",role:"manager"},{id:"e1",name:"Leyla",role:"employee"},{id:"e2",name:"Murad",role:"employee"},{id:"e3",name:"Nigar",role:"employee"},{id:"e4",name:"Rashad",role:"employee"},{id:"e5",name:"Kamran",role:"employee"}];
+  var plan=[["e1","e3"],["e2","e5"],["e1","e3"],["e2","e5"],["e1","e4"],["e2","e3"],["e1","e5"],["e2","e4"],["e3","e4"],["e1","e2"],["e2","e4"],["e1","e5"],["e2","e1"],["e4","e3"]];
+  var sh=[];plan.forEach(function(p,i){p.forEach(function(e){sh.push({id:"s"+sh.length,emp:e,day:Math.floor(i/2),slot:i%2})})});
+  var pat={e1:{0:[0,1,2,3,4,5,6],1:[4,5,6]},e2:{0:[5,6],1:[0,1,2,3,4,5,6]},e3:{0:[0,1,2,3,4],1:[0,1,2,3,4]},e4:{0:[2,3,4,5,6],1:[2,3,4,5,6]},e5:{0:[0,1,3,5],1:[0,1,3,5]}};
+  E.forEach(function(e){e.av=[];if(e.role!=="employee")return;
+    sh.forEach(function(s){if(s.emp===e.id)e.av.push(s.day+"-"+s.slot)});
+    [0,1].forEach(function(sl){(pat[e.id][sl]||[]).forEach(function(d){var k=d+"-"+sl;if(e.av.indexOf(k)<0)e.av.push(k)})})});
+  var s0=sh.filter(function(s){return s.emp==="e2"&&s.day===1&&s.slot===1})[0];
+  return {emps:E,shifts:sh,reqs:[{id:"r1",shift:s0.id,from:"e2",to:null,status:"Open"}],notes:[{id:"n1",to:"e3",text:"Murad needs cover for Tue Evening. You are available.",t:now(),read:false}]};
+}
+function load(){try{var r=localStorage.getItem("splitshift");S=r?JSON.parse(r):null}catch(e){S=null}if(!S||!S.emps)S=seed()}
+function save(){try{localStorage.setItem("splitshift",JSON.stringify(S))}catch(e){}}
+function emp(id){return S.emps.filter(function(e){return e.id===id})[0]}
+function shift(id){return S.shifts.filter(function(s){return s.id===id})[0]}
+function lbl(s){return D[s.day]+" "+SL[s.slot]+" ("+TM[s.slot]+")"}
+function eligible(s,id){var e=emp(id);
+  return e.role==="employee"&&id!==s.emp&&e.av.indexOf(s.day+"-"+s.slot)>-1&&!S.shifts.some(function(x){return x.emp===id&&x.day===s.day&&x.slot===s.slot})}
+function elig(s){return S.emps.filter(function(e){return eligible(s,e.id)})}
+function notify(to,text){S.notes.unshift({id:uid(),to:to,text:text,t:now(),read:false})}
+function me(){return emp(who)}
+function unread(){return S.notes.filter(function(n){return n.to===who&&!n.read}).length}
+function pending(){return S.reqs.filter(function(r){return r.status==="Pending"}).length}
+
+function renderTabs(){
+  var m=me().role==="manager";
+  var t=[["sched","Schedule",0],["board","Exchange board",0]];
+  if(m)t.push(["appr","Approvals",pending()]);else t.push(["avail","My availability",0]);
+  t.push(["alerts","Alerts",unread()]);
+  if(!t.some(function(x){return x[0]===tab}))tab="sched";
+  $("tabs").innerHTML=t.map(function(x){return '<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(x[0]===tab)+'">'+x[1]+(x[2]?'<span class="badge">'+x[2]+'</span>':"")+"</button>"}).join("");
+}
+function vSched(){
+  var h='<div class="panel tw"><table><thead><tr><th></th>'+D.map(function(d){return "<th>"+d+"</th>"}).join("")+"</tr></thead><tbody>";
+  [0,1].forEach(function(sl){
+    h+="<tr><th>"+SL[sl]+"<br>"+TM[sl]+"</th>";
+    D.forEach(function(d,di){
+      h+="<td>"+S.shifts.filter(function(s){return s.day===di&&s.slot===sl}).map(function(s){
+        var own=s.emp===who,req=S.reqs.some(function(r){return r.shift===s.id&&(r.status==="Open"||r.status==="Pending")});
+        return '<span class="chip'+(own?" me":"")+'">'+esc(emp(s.emp).name)+(req?' <span class="mut">swap requested</span>':own&&me().role==="employee"?'<button class="btn s" data-a="swap" data-id="'+s.id+'">Request swap</button>':"")+"</span>"}).join("")+"</td>"});
+    h+="</tr>"});
+  return h+'</tbody></table></div><p class="mut">Your shifts are highlighted. Choose Request swap on a shift you cannot work.</p>';
+}
+function vBoard(){
+  var l=S.reqs.slice().reverse();
+  if(!l.length)return '<div class="panel empty">No swap requests yet.</div>';
+  return l.map(function(r){var s=shift(r.shift),from=emp(r.from),el=elig(s);
+    var act="";
+    if(r.status==="Open"){
+      if(who===r.from)act='<button class="btn g" data-a="cancel" data-id="'+r.id+'">Cancel request</button>';
+      else if(eligible(s,who))act='<button class="btn" data-a="take" data-id="'+r.id+'">Take this shift</button>';
+    }
+    var info=r.status==="Open"?'<div class="names mut">Eligible: '+(el.length?el.map(function(e){return "<span>"+esc(e.name)+"</span>"}).join(""):"nobody available")+"</div>":
+      r.status==="Pending"?'<div class="mut">Taken by '+esc(emp(r.to).name)+", waiting for manager approval.</div>":
+      r.status==="Approved"?'<div class="mut">'+esc(emp(r.to).name)+" now works this shift.</div>":"";
+    return '<div class="panel"><div class="row"><div><b>'+esc(from.name)+" needs cover</b><br>"+esc(lbl(s))+'</div><span class="pill '+r.status+'">'+r.status+"</span></div>"+info+(act?'<p style="margin:10px 0 0">'+act+"</p>":"")+"</div>"}).join("");
+}
+function vAppr(){
+  var l=S.reqs.filter(function(r){return r.status==="Pending"});
+  if(!l.length)return '<div class="panel empty">Nothing waiting for approval.</div>';
+  return l.map(function(r){var s=shift(r.shift);
+    return '<div class="panel"><div class="row"><div><b>'+esc(emp(r.from).name)+" → "+esc(emp(r.to).name)+"</b><br>"+esc(lbl(s))+'</div><div><button class="btn" data-a="ok" data-id="'+r.id+'">Approve</button> <button class="btn g" data-a="no" data-id="'+r.id+'">Decline</button></div></div></div>'}).join("");
+}
+function vAvail(){
+  var e=me(),h='<div class="panel"><h3>When can you work?</h3><p class="mut">SplitShift uses this to match you with swap requests. Changes save automatically.</p><div class="av"><span></span>'+D.map(function(d){return "<b>"+d+"</b>"}).join("");
+  [0,1].forEach(function(sl){h+="<span>"+SL[sl]+"</span>"+D.map(function(d,di){var k=di+"-"+sl;return '<input type="checkbox" data-av="'+k+'" aria-label="'+d+" "+SL[sl]+'"'+(e.av.indexOf(k)>-1?" checked":"")+">"}).join("")});
+  return h+"</div></div>";
+}
+function vAlerts(){
+  var l=S.notes.filter(function(n){return n.to===who});
+  if(!l.length)return '<div class="panel empty">No alerts.</div>';
+  return '<p><button class="btn g s" data-a="read">Mark all read</button></p>'+l.map(function(n){return '<div class="panel'+(n.read?"":" new")+'"><div class="row"><span>'+esc(n.text)+'</span><span class="mut">'+esc(n.t)+"</span></div></div>"}).join("");
+}
+function render(){
+  renderTabs();
+  $("view").innerHTML={sched:vSched,board:vBoard,appr:vAppr,avail:vAvail,alerts:vAlerts}[tab]();
+}
+$("tabs").onclick=function(e){var t=e.target.closest("button");if(t){tab=t.getAttribute("data-tab");render()}};
+$("who").onchange=function(){who=$("who").value;render()};
+$("view").onclick=function(e){
+  var b=e.target.closest("button[data-a]");if(!b)return;
+  var a=b.getAttribute("data-a"),id=b.getAttribute("data-id"),r=S.reqs.filter(function(x){return x.id===id})[0];
+  if(a==="swap"){var s=shift(id);
+    S.reqs.push({id:uid(),shift:id,from:who,to:null,status:"Open"});
+    elig(s).forEach(function(c){notify(c.id,me().name+" needs cover for "+D[s.day]+" "+SL[s.slot]+". You are available.")});
+    notify("e0",me().name+" posted "+D[s.day]+" "+SL[s.slot]+" for exchange.");tab="board"}
+  if(a==="cancel")r.status="Cancelled";
+  if(a==="take"){r.status="Pending";r.to=who;var s2=shift(r.shift);
+    notify("e0",me().name+" will take "+emp(r.from).name+"'s "+D[s2.day]+" "+SL[s2.slot]+". Approval needed.");
+    notify(r.from,me().name+" offered to take your "+D[s2.day]+" "+SL[s2.slot]+". Waiting for the manager.")}
+  if(a==="ok"||a==="no"){var s3=shift(r.shift),txt=D[s3.day]+" "+SL[s3.slot];
+    if(a==="ok"){s3.emp=r.to;r.status="Approved"}else r.status="Declined";
+    var w=a==="ok"?"approved":"declined";
+    notify(r.from,"Your swap for "+txt+" was "+w+".");notify(r.to,"The swap for "+txt+" was "+w+".")}
+  if(a==="read")S.notes.forEach(function(n){if(n.to===who)n.read=true});
+  save();render();
+};
+$("view").onchange=function(e){var k=e.target.getAttribute("data-av");if(!k)return;
+  var av=me().av,i=av.indexOf(k);if(e.target.checked&&i<0)av.push(k);if(!e.target.checked&&i>-1)av.splice(i,1);save()};
+$("reset").onclick=function(){if(confirm("Reset all demo data?")){S=seed();save();render()}};
+load();
+$("who").innerHTML=S.emps.map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+" ("+e.role+")</option>"}).join("");
+$("who").value=who;render();
+</script>
+</body>
+</html>
